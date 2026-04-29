@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gusanito del Amor 💖</title>
+
+<style>
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    text-align: center;
+    font-family: Arial;
+}
+
+canvas {
+    background: black;
+    display: block;
+    margin: auto;
+    border: 3px solid pink;
+}
+
+#gameOver, #winBox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    text-align: center;
+    padding-top: 120px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#retry {
+    background: #ff4d6d;
+    color: white;
+}
+
+#exit {
+    background: purple;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🐍 Juega con mi Gusano 💖</h1>
+<h1>💖Desbloquea el premio golosa💖</h1>
+<p>Puntos: <span id="puntos">0</span></p>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<!-- 💔 (YA NO SE USA, PERO LO DEJO POR ESTRUCTURA) -->
+<div id="gameOver">
+    <h1 id="msg">Perdiste...</h1>
+    <p>Pero igual te quiero </p>
+
+    <button onclick="reiniciar()">🔁 Jugar de nuevo</button>
+</div>
+
+<!-- 🎁 PREMIO -->
+<div id="winBox">
+    <h1>🎁 PREMIO DESBLOQUEADO 💖</h1>
+    <p>Llegaste a 25 puntos 😏🐍</p>
+
+    <button onclick="irFinal()">💌 Ir al final</button>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let estado = "jugando";
+let puntos = 0;
+
+let speed = 0.6;
+let size = 10;
+
+let head = {x: 200, y: 200};
+let dir = {x: 0, y: 0};
+
+let snake = [];
+for (let i = 0; i < 20; i++) {
+    snake.push({x: 200, y: 200});
+}
+
+let heart = randomHeart();
+
+document.addEventListener("keydown", e => {
+    if (estado !== "jugando") return;
+
+    if (e.key === "ArrowUp") dir = {x: 0, y: -2};
+    if (e.key === "ArrowDown") dir = {x: 0, y: 2};
+    if (e.key === "ArrowLeft") dir = {x: -2, y: 0};
+    if (e.key === "ArrowRight") dir = {x: 2, y: 0};
+});
+
+function randomHeart() {
+    return {
+        x: Math.random() * 380,
+        y: Math.random() * 380
+    };
+}
+
+function follow(target, current, smooth = 0.25) {
+    current.x += (target.x - current.x) * smooth;
+    current.y += (target.y - current.y) * smooth;
+}
+
+function update() {
+    if (estado !== "jugando") return;
+
+    head.x += dir.x * speed;
+    head.y += dir.y * speed;
+
+    let prev = head;
+    for (let i = 0; i < snake.length; i++) {
+        follow(prev, snake[i], 0.25);
+        prev = snake[i];
+    }
+
+    // 💥 colisión corazón
+    let dx = head.x - (heart.x + 10);
+    let dy = head.y - (heart.y + 10);
+    let dist = Math.sqrt(dx * dx + dy * dy);
+
+    let collisionRadius = size + 6;
+
+    if (dist < collisionRadius) {
+        puntos++;
+        document.getElementById("puntos").innerText = puntos;
+
+        heart = randomHeart();
+        snake.push({...snake[snake.length - 1]});
+
+        size += 0.4;
+        speed += 0.01;
+
+        // 🎁 premio
+        if (puntos >= 25) {
+            mostrarPremio();
+        }
+    }
+
+    // ❌ CHOQUE = REINICIO AUTOMÁTICO (NO GAME OVER)
+    if (head.x < 0 || head.y < 0 || head.x > 400 || head.y > 400) {
+        reinicioRapido();
+    }
+}
+
+function draw() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, 400, 400);
+
+    ctx.font = "20px Arial";
+    ctx.fillText("💖", heart.x, heart.y + 15);
+
+    drawSnake();
+    drawHead();
+}
+
+function drawSnake() {
+    let time = Date.now() * 0.005;
+
+    for (let i = snake.length - 1; i > 0; i--) {
+
+        let p1 = snake[i];
+        let p2 = snake[i - 1];
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+
+        let base = 120 + puntos * 10;
+        let glow = Math.sin(time + i * 0.3) * 40 + base;
+        glow = Math.min(255, glow);
+
+        ctx.strokeStyle = `rgb(0, ${glow}, 100)`;
+        ctx.lineWidth = 10;
+        ctx.stroke();
+
+        let brightness = Math.min(255, 80 + puntos * 12);
+
+        ctx.fillStyle = `rgba(0, ${brightness}, 150, 0.6)`;
+
+        ctx.beginPath();
+        ctx.arc(
+            p1.x + Math.sin(time + i) * 2,
+            p1.y + Math.cos(time + i) * 2,
+            3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+}
+
+function drawHead() {
+    ctx.fillStyle = "#27ae60";
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, size, 0, Math.PI * 2);
+    ctx.fill();
+
+    let eyeOffsetX = dir.x * 2;
+    let eyeOffsetY = dir.y * 2;
+
+    ctx.fillStyle = "white";
+
+    ctx.beginPath();
+    ctx.arc(head.x - size/2 + eyeOffsetX, head.y - size/3 + eyeOffsetY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(head.x + size/2 + eyeOffsetX, head.y - size/3 + eyeOffsetY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+// 🎁 PREMIO
+function mostrarPremio() {
+    estado = "pausa";
+    document.getElementById("winBox").style.display = "block";
+}
+
+// 🔁 REINICIO AUTOMÁTICO
+function reinicioRapido() {
+    head = {x: 200, y: 200};
+    dir = {x: 0, y: 0};
+
+    snake = [];
+    for (let i = 0; i < 20; i++) {
+        snake.push({x: 200, y: 200});
+    }
+
+    heart = randomHeart();
+
+    size = 10;
+    speed = 0.6;
+}
+
+// 🔁 REINICIO MANUAL
+function reiniciar() {
+    estado = "jugando";
+
+    puntos = 0;
+    document.getElementById("puntos").innerText = 0;
+
+    size = 10;
+    speed = 0.6;
+
+    head = {x: 200, y: 200};
+    dir = {x: 0, y: 0};
+
+    snake = [];
+    for (let i = 0; i < 20; i++) {
+        snake.push({x: 200, y: 200});
+    }
+
+    heart = randomHeart();
+
+    document.getElementById("gameOver").style.display = "none";
+    document.getElementById("winBox").style.display = "none";
+}
+
+// 🚪 FINAL
+function irFinal() {
+    window.location.href = "final.html";
+}
+
+loop();
+</script>
+
+</body>
+</html>

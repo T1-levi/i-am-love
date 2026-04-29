@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Para Catalina 💖</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #ff4d6d, #111);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial;
+    color: white;
+    overflow: hidden;
+}
+
+/* 🐱 contenedor principal */
+.card {
+    background: rgba(0,0,0,0.6);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px pink;
+    max-width: 400px;
+    text-align: center;
+    z-index: 2;
+    position: relative;
+}
+
+h1 {
+    font-size: 28px;
+    color: #ffccff;
+}
+
+p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #ff4d6d;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+
+/* 💖 HELLO KITTY LATERALES */
+.side {
+    position: fixed;
+    top: 0;
+    width: 120px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1;
+}
+
+.left {
+    left: 0;
+}
+
+.right {
+    right: 0;
+}
+
+.side img {
+    width: 90px;
+    animation: float 3s infinite ease-in-out;
+}
+
+/* movimiento suave */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}
+
+/* 💖 corazones flotando */
+.heart {
+    position: absolute;
+    color: pink;
+    animation: floatHeart 5s linear infinite;
+}
+
+@keyframes floatHeart {
+    0% { transform: translateY(100vh); opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🐱 LADO IZQUIERDO -->
+<div class="side left">
+    <img src="gato5.jpg">
+    <img src="gato6.jpg">
+    <img src="gato4.jpg">
+</div>
+
+<!-- 🐱 LADO DERECHO -->
+<div class="side right">
+    <img src="gato1.png">
+    <img src="gato2.png">
+    <img src="gato3.png">
+</div>
+
+<!-- 💖 CONTENIDO -->
+<div class="card">
+    <h1>💖Feliz Cumpleaños Cata💖</h1>
+    <p>
+        Te hice un pequeño juego especial bbe<br>
+        Solo hay una misión: llegar a 25 puntos para recibir tu recompensa  💖
+    </p>
+
+    <button onclick="entrar()">🎮 Jugar ahora</button>
+</div>
+
+<script>
+function entrar() {
+    window.location.href = "juego-gusanito.html";
+}
+
+// 💖 corazones flotando
+setInterval(() => {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerText = "💖";
+    heart.style.left = Math.random() * 100 + "vw";
+    document.body.appendChild(heart);
+
+    setTimeout(() => heart.remove(), 5000);
+}, 300);
+</script>
+
+</body>
+</html>
